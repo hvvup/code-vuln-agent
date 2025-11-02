@@ -727,17 +727,6 @@ class CFGBuilder:
 
 
 __all__ = ["CFGBuilder"]
-"""Build control flow graphs for JavaScript functions based on ESTree ASTs."""
-
-from __future__ import annotations
-
-from dataclasses import dataclass
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
-
-from .structures import CFGEdge, CFGNode, FileCFG, FunctionCFG, Span
-from .utils import compute_text_hash, merge_spans, span_from_node
-
-
 @dataclass
 class FunctionLike:
     node: Dict[str, Any]

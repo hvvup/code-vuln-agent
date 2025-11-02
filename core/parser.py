@@ -64,8 +64,16 @@ class JavaScriptParser:
         }
 
         if parse_as_module:
-            return esprima.parse_module(source, **parse_kwargs)
-        return esprima.parse_script(source, **parse_kwargs)
+            parser_fn = getattr(esprima, "parse_module", None) or getattr(esprima, "parseModule")
+        else:
+            parser_fn = getattr(esprima, "parse_script", None) or getattr(esprima, "parseScript")
+
+        program = parser_fn(source, **parse_kwargs)
+        if hasattr(program, "toDict"):
+            return program.toDict()
+        if isinstance(program, dict):
+            return program
+        raise TypeError("Unexpected AST type returned by esprima parser")
 
     def _should_parse_as_module(self, source: str, module_hint: str) -> bool:
         if module_hint == "module":

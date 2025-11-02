@@ -91,15 +91,15 @@ python vulnerability_analyzer/example_usage.py
 
 ## Usage Examples
 
-### Example 1: Analyze a Single File
+### Example 1: Analyze a Single File (Full Mode - with CodeQL)
 
 ```python
 from langchain_openai import ChatOpenAI
-from vulnerability_analyzer.agents import create_vulnerability_agent
+from agents import VulnerabilityAnalysisAgent
 
-# Create agent
+# Create agent with CodeQL (default)
 llm = ChatOpenAI(model="gpt-4", temperature=0)
-agent = create_vulnerability_agent(llm=llm, verbose=True)
+agent = VulnerabilityAnalysisAgent(llm=llm, verbose=True)
 
 # Analyze
 result = agent.analyze_file("tests/sample_vulnerable_code.js")
@@ -107,6 +107,27 @@ result = agent.analyze_file("tests/sample_vulnerable_code.js")
 print(f"Analysis completed in {result['iterations']} iterations")
 print(result["output"])
 ```
+
+### Example 1b: Analyze WITHOUT CodeQL (No Docker Required)
+
+```python
+from langchain_openai import ChatOpenAI
+from agents import VulnerabilityAnalysisAgent
+
+# Create agent WITHOUT CodeQL
+llm = ChatOpenAI(model="gpt-4", temperature=0)
+agent = VulnerabilityAnalysisAgent(
+    llm=llm,
+    verbose=True,
+    use_codeql=False,  # Disable CodeQL - only use CFG analysis
+)
+
+# Analyze (works without Docker!)
+result = agent.analyze_file("tests/sample_vulnerable_code.js")
+print(result["output"])
+```
+
+**📖 See `USING_WITHOUT_CODEQL.md` for complete guide on CFG-only analysis.**
 
 ### Example 2: Custom Security Query
 

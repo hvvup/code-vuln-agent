@@ -37,10 +37,36 @@ cp .env.example .env
 ```
 ## Development Status
 
-- [ ] Project structure setup
-- [ ] AST parser implementation
-- [ ] CFG generator implementation
-- [x] CodeQL integration
-- [ ] LangChain agent design
-- [ ] LLM prompt engineering
+- [x] Project structure setup
+- [x] AST parser implementation
+- [x] CFG generator implementation
+- [x] CodeQL integration (Docker-based)
+- [x] LangChain agent design (ReAct pattern)
+- [x] LLM prompt engineering
+- [x] Support for CodeQL-free analysis (CFG-only mode)
 - [ ] Visualization and reporting
+
+## Quick Start
+
+See `AGENT_SETUP.md` for complete setup instructions.
+
+### With CodeQL (Full Analysis)
+```python
+from langchain_openai import ChatOpenAI
+from agents import VulnerabilityAnalysisAgent
+
+llm = ChatOpenAI(model="gpt-4", temperature=0)
+agent = VulnerabilityAnalysisAgent(llm=llm, verbose=True)
+result = agent.analyze_file("file.js")
+```
+
+### Without CodeQL (CFG-Only Analysis - No Docker)
+```python
+agent = VulnerabilityAnalysisAgent(
+    llm=llm,
+    use_codeql=False  # No Docker required!
+)
+result = agent.analyze_file("file.js")
+```
+
+📖 See `USING_WITHOUT_CODEQL.md` for details on CFG-only analysis.
