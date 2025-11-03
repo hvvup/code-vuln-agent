@@ -1,0 +1,487 @@
+[
+  {
+    "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
+    "funcId": "f_F622",
+    "partitionId": "pi_1",
+    "nodeSeq": [
+      "n0",
+      "n20",
+      "n19",
+      "n18",
+      "n17",
+      "n16",
+      "n15",
+      "n14",
+      "n13",
+      "n12",
+      "n11",
+      "n10",
+      "n9",
+      "n8",
+      "n7",
+      "n6",
+      "n5",
+      "n4",
+      "n3",
+      "n2",
+      "n1"
+    ],
+    "sliceSpans": [
+      {
+        "startLine": 6,
+        "endLine": 161
+      }
+    ],
+    "assumedOut": []
+  },
+  {
+    "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
+    "funcId": "f_2BAB",
+    "partitionId": "pi_1",
+    "nodeSeq": [
+      "n0",
+      "n4",
+      "n3",
+      "n2",
+      "n1"
+    ],
+    "sliceSpans": [
+      {
+        "startLine": 23,
+        "endLine": 35
+      }
+    ],
+    "assumedOut": []
+  },
+  {
+    "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
+    "funcId": "f_A4E6",
+    "partitionId": "pi_1",
+    "nodeSeq": [
+      "n0",
+      "n3",
+      "n5",
+      "n4",
+      "n1"
+    ],
+    "sliceSpans": [
+      {
+        "startLine": 28,
+        "endLine": 34
+      }
+    ],
+    "assumedOut": [
+      "n2"
+    ]
+  },
+  {
+    "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
+    "funcId": "f_A4E6",
+    "partitionId": "pi_2",
+    "nodeSeq": [
+      "n0",
+      "n3",
+      "n2",
+      "n1"
+    ],
+    "sliceSpans": [
+      {
+        "startLine": 28,
+        "endLine": 34
+      }
+    ],
+    "assumedOut": [
+      "n4",
+      "n5"
+    ]
+  },
+  {
+    "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
+    "funcId": "f_3201",
+    "partitionId": "pi_1",
+    "nodeSeq": [
+      "n0",
+      "n3",
+      "n2",
+      "n1"
+    ],
+    "sliceSpans": [
+      {
+        "startLine": 41,
+        "endLine": 51
+      }
+    ],
+    "assumedOut": []
+  },
+  {
+    "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
+    "funcId": "f_85A",
+    "partitionId": "pi_1",
+    "nodeSeq": [
+      "n0",
+      "n3",
+      "n5",
+      "n4",
+      "n1"
+    ],
+    "sliceSpans": [
+      {
+        "startLine": 44,
+        "endLine": 50
+      }
+    ],
+    "assumedOut": [
+      "n2"
+    ]
+  },
+  {
+    "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
+    "funcId": "f_85A",
+    "partitionId": "pi_2",
+    "nodeSeq": [
+      "n0",
+      "n3",
+      "n2",
+      "n1"
+    ],
+    "sliceSpans": [
+      {
+        "startLine": 44,
+        "endLine": 50
+      }
+    ],
+    "assumedOut": [
+      "n4",
+      "n5"
+    ]
+  },
+  {
+    "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
+    "funcId": "f_8F8A",
+    "partitionId": "pi_1",
+    "nodeSeq": [
+      "n0",
+      "n3",
+      "n2",
+      "n1"
+    ],
+    "sliceSpans": [
+      {
+        "startLine": 55,
+        "endLine": 66
+      }
+    ],
+    "assumedOut": []
+  },
+  {
+    "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
+    "funcId": "f_5858",
+    "partitionId": "pi_1",
+    "nodeSeq": [
+      "n0",
+      "n4",
+      "n3",
+      "n2",
+      "n1"
+    ],
+    "sliceSpans": [
+      {
+        "startLine": 72,
+        "endLine": 84
+      }
+    ],
+    "assumedOut": []
+  },
+  {
+    "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
+    "funcId": "f_75B6",
+    "partitionId": "pi_1",
+    "nodeSeq": [
+      "n0",
+      "n3",
+      "n5",
+      "n4",
+      "n1"
+    ],
+    "sliceSpans": [
+      {
+        "startLine": 77,
+        "endLine": 83
+      }
+    ],
+    "assumedOut": [
+      "n2"
+    ]
+  },
+  {
+    "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
+    "funcId": "f_75B6",
+    "partitionId": "pi_2",
+    "nodeSeq": [
+      "n0",
+      "n3",
+      "n2",
+      "n1"
+    ],
+    "sliceSpans": [
+      {
+        "startLine": 77,
+        "endLine": 83
+      }
+    ],
+    "assumedOut": [
+      "n4",
+      "n5"
+    ]
+  },
+  {
+    "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
+    "funcId": "f_ABA9",
+    "partitionId": "pi_1",
+    "nodeSeq": [
+      "n0",
+      "n5",
+      "n4",
+      "n3",
+      "n2",
+      "n1"
+    ],
+    "sliceSpans": [
+      {
+        "startLine": 88,
+        "endLine": 109
+      }
+    ],
+    "assumedOut": []
+  },
+  {
+    "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
+    "funcId": "f_B48D",
+    "partitionId": "pi_1",
+    "nodeSeq": [
+      "n0",
+      "n6",
+      "n8",
+      "n7",
+      "n1"
+    ],
+    "sliceSpans": [
+      {
+        "startLine": 95,
+        "endLine": 108
+      }
+    ],
+    "assumedOut": [
+      "n2",
+      "n3",
+      "n4",
+      "n5"
+    ]
+  },
+  {
+    "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
+    "funcId": "f_B48D",
+    "partitionId": "pi_2",
+    "nodeSeq": [
+      "n0",
+      "n6",
+      "n2",
+      "n4",
+      "n3",
+      "n1"
+    ],
+    "sliceSpans": [
+      {
+        "startLine": 95,
+        "endLine": 108
+      }
+    ],
+    "assumedOut": [
+      "n5",
+      "n7",
+      "n8"
+    ]
+  },
+  {
+    "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
+    "funcId": "f_B48D",
+    "partitionId": "pi_3",
+    "nodeSeq": [
+      "n0",
+      "n6",
+      "n2",
+      "n5",
+      "n1"
+    ],
+    "sliceSpans": [
+      {
+        "startLine": 95,
+        "endLine": 108
+      }
+    ],
+    "assumedOut": [
+      "n3",
+      "n4",
+      "n7",
+      "n8"
+    ]
+  },
+  {
+    "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
+    "funcId": "f_2D05",
+    "partitionId": "pi_1",
+    "nodeSeq": [
+      "n0",
+      "n4",
+      "n3",
+      "n2",
+      "n1"
+    ],
+    "sliceSpans": [
+      {
+        "startLine": 112,
+        "endLine": 119
+      }
+    ],
+    "assumedOut": []
+  },
+  {
+    "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
+    "funcId": "f_E4F",
+    "partitionId": "pi_1",
+    "nodeSeq": [
+      "n0",
+      "n4",
+      "n3",
+      "n2",
+      "n1"
+    ],
+    "sliceSpans": [
+      {
+        "startLine": 123,
+        "endLine": 135
+      }
+    ],
+    "assumedOut": []
+  },
+  {
+    "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
+    "funcId": "f_7E95",
+    "partitionId": "pi_1",
+    "nodeSeq": [
+      "n0",
+      "n3",
+      "n5",
+      "n4",
+      "n1"
+    ],
+    "sliceSpans": [
+      {
+        "startLine": 128,
+        "endLine": 134
+      }
+    ],
+    "assumedOut": [
+      "n2"
+    ]
+  },
+  {
+    "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
+    "funcId": "f_7E95",
+    "partitionId": "pi_2",
+    "nodeSeq": [
+      "n0",
+      "n3",
+      "n2",
+      "n1"
+    ],
+    "sliceSpans": [
+      {
+        "startLine": 128,
+        "endLine": 134
+      }
+    ],
+    "assumedOut": [
+      "n4",
+      "n5"
+    ]
+  },
+  {
+    "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
+    "funcId": "f_D1FA",
+    "partitionId": "pi_1",
+    "nodeSeq": [
+      "n0",
+      "n2",
+      "n6",
+      "n5",
+      "n1"
+    ],
+    "sliceSpans": [
+      {
+        "startLine": 139,
+        "endLine": 152
+      }
+    ],
+    "assumedOut": [
+      "n3",
+      "n4"
+    ]
+  },
+  {
+    "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
+    "funcId": "f_D1FA",
+    "partitionId": "pi_2",
+    "nodeSeq": [
+      "n0",
+      "n2",
+      "n3",
+      "n4",
+      "n1"
+    ],
+    "sliceSpans": [
+      {
+        "startLine": 139,
+        "endLine": 152
+      }
+    ],
+    "assumedOut": [
+      "n5",
+      "n6"
+    ]
+  },
+  {
+    "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
+    "funcId": "f_3E2F",
+    "partitionId": "pi_1",
+    "nodeSeq": [
+      "n0",
+      "n2",
+      "n1"
+    ],
+    "sliceSpans": [
+      {
+        "startLine": 154,
+        "endLine": 156
+      }
+    ],
+    "assumedOut": []
+  },
+  {
+    "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
+    "funcId": "f_3F80",
+    "partitionId": "pi_1",
+    "nodeSeq": [
+      "n0",
+      "n2",
+      "n1"
+    ],
+    "sliceSpans": [
+      {
+        "startLine": 159,
+        "endLine": 161
+      }
+    ],
+    "assumedOut": []
+  }
+]

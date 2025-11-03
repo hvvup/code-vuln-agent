@@ -1,10 +1,14 @@
 # Core dependencies
-langchain>=0.1.0
-langchain-openai>=0.0.5  # or langchain-anthropic for Claude
+langchain>=0.3.0
+langchain-core>=0.3.0
+langchain-openai>=0.2.0
+langchain-anthropic>=0.3.0  # Alternative to OpenAI
 
 # AST and CFG
 astor>=0.8.1
 graphviz>=0.20
+esprima>=4.0.1
+networkx>=3.2
 
 # Static analysis (note: CodeQL requires separate installation)
 # See: https://github.com/github/codeql-cli-binaries
