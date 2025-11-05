@@ -1,7 +1,7 @@
 [
   {
     "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
-    "funcId": "f_F622",
+    "funcId": "f_4987",
     "policy": "head_tail_k",
     "selectedNodes": [
       "n0",
@@ -30,7 +30,7 @@
   },
   {
     "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
-    "funcId": "f_2BAB",
+    "funcId": "f_C313",
     "policy": "head_tail_k",
     "selectedNodes": [
       "n0",
@@ -43,7 +43,7 @@
   },
   {
     "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
-    "funcId": "f_A4E6",
+    "funcId": "f_3CDA",
     "policy": "head_tail_k",
     "selectedNodes": [
       "n0",
@@ -57,7 +57,7 @@
   },
   {
     "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
-    "funcId": "f_3201",
+    "funcId": "f_E2D0",
     "policy": "head_tail_k",
     "selectedNodes": [
       "n0",
@@ -69,7 +69,7 @@
   },
   {
     "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
-    "funcId": "f_85A",
+    "funcId": "f_CFF9",
     "policy": "head_tail_k",
     "selectedNodes": [
       "n0",
@@ -83,7 +83,7 @@
   },
   {
     "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
-    "funcId": "f_8F8A",
+    "funcId": "f_D2D2",
     "policy": "head_tail_k",
     "selectedNodes": [
       "n0",
@@ -95,7 +95,7 @@
   },
   {
     "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
-    "funcId": "f_5858",
+    "funcId": "f_10FD",
     "policy": "head_tail_k",
     "selectedNodes": [
       "n0",
@@ -108,7 +108,7 @@
   },
   {
     "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
-    "funcId": "f_75B6",
+    "funcId": "f_4CF1",
     "policy": "head_tail_k",
     "selectedNodes": [
       "n0",
@@ -122,7 +122,7 @@
   },
   {
     "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
-    "funcId": "f_ABA9",
+    "funcId": "f_64AC",
     "policy": "head_tail_k",
     "selectedNodes": [
       "n0",
@@ -136,7 +136,7 @@
   },
   {
     "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
-    "funcId": "f_B48D",
+    "funcId": "f_73E7",
     "policy": "head_tail_k",
     "selectedNodes": [
       "n0",
@@ -153,7 +153,7 @@
   },
   {
     "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
-    "funcId": "f_2D05",
+    "funcId": "f_EB3E",
     "policy": "head_tail_k",
     "selectedNodes": [
       "n0",
@@ -166,7 +166,7 @@
   },
   {
     "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
-    "funcId": "f_E4F",
+    "funcId": "f_25",
     "policy": "head_tail_k",
     "selectedNodes": [
       "n0",
@@ -179,7 +179,7 @@
   },
   {
     "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
-    "funcId": "f_7E95",
+    "funcId": "f_D78E",
     "policy": "head_tail_k",
     "selectedNodes": [
       "n0",
@@ -193,7 +193,7 @@
   },
   {
     "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
-    "funcId": "f_D1FA",
+    "funcId": "f_6D07",
     "policy": "head_tail_k",
     "selectedNodes": [
       "n0",
@@ -208,7 +208,7 @@
   },
   {
     "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
-    "funcId": "f_3E2F",
+    "funcId": "f_3656",
     "policy": "head_tail_k",
     "selectedNodes": [
       "n0",
@@ -219,7 +219,7 @@
   },
   {
     "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
-    "funcId": "f_3F80",
+    "funcId": "f_62B1",
     "policy": "head_tail_k",
     "selectedNodes": [
       "n0",

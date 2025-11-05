@@ -5,7 +5,7 @@
       "filePath": "D:\\projects\\test\\tests\\sample_vulnerable_code.js",
       "functions": [
         {
-          "funcId": "f_F622",
+          "funcId": "f_4987",
           "name": "<global>",
           "entry": "n0",
           "exits": [
@@ -56180,7 +56180,7 @@
           }
         },
         {
-          "funcId": "f_2BAB",
+          "funcId": "f_C313",
           "name": "<anonymous@23:17>",
           "entry": "n0",
           "exits": [
@@ -59077,7 +59077,7 @@
           }
         },
         {
-          "funcId": "f_A4E6",
+          "funcId": "f_3CDA",
           "name": "<anonymous@28:20>",
           "entry": "n0",
           "exits": [
@@ -60788,7 +60788,7 @@
           }
         },
         {
-          "funcId": "f_3201",
+          "funcId": "f_E2D0",
           "name": "<anonymous@41:20>",
           "entry": "n0",
           "exits": [
@@ -63348,7 +63348,7 @@
           }
         },
         {
-          "funcId": "f_85A",
+          "funcId": "f_CFF9",
           "name": "<anonymous@44:55>",
           "entry": "n0",
           "exits": [
@@ -65098,7 +65098,7 @@
           }
         },
         {
-          "funcId": "f_8F8A",
+          "funcId": "f_D2D2",
           "name": "<anonymous@55:19>",
           "entry": "n0",
           "exits": [
@@ -66392,7 +66392,7 @@
           }
         },
         {
-          "funcId": "f_5858",
+          "funcId": "f_10FD",
           "name": "<anonymous@72:21>",
           "entry": "n0",
           "exits": [
@@ -69262,7 +69262,7 @@
           }
         },
         {
-          "funcId": "f_75B6",
+          "funcId": "f_4CF1",
           "name": "<anonymous@77:26>",
           "entry": "n0",
           "exits": [
@@ -70973,7 +70973,7 @@
           }
         },
         {
-          "funcId": "f_ABA9",
+          "funcId": "f_64AC",
           "name": "<anonymous@88:19>",
           "entry": "n0",
           "exits": [
@@ -75583,7 +75583,7 @@
           }
         },
         {
-          "funcId": "f_B48D",
+          "funcId": "f_73E7",
           "name": "<anonymous@95:20>",
           "entry": "n0",
           "exits": [
@@ -78889,7 +78889,7 @@
           }
         },
         {
-          "funcId": "f_2D05",
+          "funcId": "f_EB3E",
           "name": "<anonymous@112:28>",
           "entry": "n0",
           "exits": [
@@ -80928,7 +80928,7 @@
           }
         },
         {
-          "funcId": "f_E4F",
+          "funcId": "f_25",
           "name": "<anonymous@123:30>",
           "entry": "n0",
           "exits": [
@@ -83747,7 +83747,7 @@
           }
         },
         {
-          "funcId": "f_7E95",
+          "funcId": "f_D78E",
           "name": "<anonymous@128:20>",
           "entry": "n0",
           "exits": [
@@ -85425,7 +85425,7 @@
           }
         },
         {
-          "funcId": "f_D1FA",
+          "funcId": "f_6D07",
           "name": "<anonymous@139:21>",
           "entry": "n0",
           "exits": [
@@ -89131,7 +89131,7 @@
           }
         },
         {
-          "funcId": "f_3E2F",
+          "funcId": "f_3656",
           "name": "getSensitiveData",
           "entry": "n0",
           "exits": [
@@ -89606,7 +89606,7 @@
           }
         },
         {
-          "funcId": "f_3F80",
+          "funcId": "f_62B1",
           "name": "<anonymous@159:17>",
           "entry": "n0",
           "exits": [
