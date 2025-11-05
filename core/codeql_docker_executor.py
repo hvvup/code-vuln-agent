@@ -79,6 +79,7 @@ class CodeQLDockerExecutor:
         self,
         source_file: str,
         query_suite: str = "javascript-security-extended.qls",
+        database_path: Optional[str] = None,
     ) -> str:
         """
         Analyze a JavaScript file for vulnerabilities.
@@ -86,6 +87,8 @@ class CodeQLDockerExecutor:
         Args:
             source_file: Path to the JavaScript file to analyze
             query_suite: CodeQL query suite to use
+            database_path: Optional path to existing CodeQL database. If provided, skips database creation.
+                          If None, checks CODEQL_DATABASE_PATH environment variable, then creates new DB.
 
         Returns:
             Path to the generated SARIF report
@@ -94,23 +97,40 @@ class CodeQLDockerExecutor:
         if not src_path.exists():
             raise FileNotFoundError(f"❌ Source file not found: {src_path}")
 
+        # Check for existing database
+        db_path_to_use = database_path or os.getenv("CODEQL_DATABASE_PATH")
+
         # Use different execution modes based on container_id
         if self.container_id:
-            return self._analyze_with_running_container(src_path, query_suite)
+            return self._analyze_with_running_container(src_path, query_suite, db_path_to_use)
         else:
-            return self._analyze_with_ephemeral_container(src_path, query_suite)
+            return self._analyze_with_ephemeral_container(src_path, query_suite, db_path_to_use)
 
     def _analyze_with_ephemeral_container(
         self,
         src_path: Path,
         query_suite: str,
+        database_path: Optional[str] = None,
     ) -> str:
         """Analyze using ephemeral docker run --rm containers."""
         work_dir = Path(tempfile.mkdtemp())
-        db_dir = work_dir / "codeql-db"
         out_dir = work_dir / "out"
-        db_dir.mkdir(parents=True, exist_ok=True)
         out_dir.mkdir(parents=True, exist_ok=True)
+
+        # Handle database path
+        if database_path:
+            db_dir = Path(database_path).resolve()
+            if not db_dir.exists():
+                raise FileNotFoundError(
+                    f"❌ Specified CodeQL database not found: {db_dir}\n"
+                    f"Please check the path or remove CODEQL_DATABASE_PATH to create a new database."
+                )
+            print(f"♻️  Using existing CodeQL database: {db_dir}")
+            skip_db_creation = True
+        else:
+            db_dir = work_dir / "codeql-db"
+            db_dir.mkdir(parents=True, exist_ok=True)
+            skip_db_creation = False
 
         # Helper to run docker command and raise clearer error with output
         def run_cmd(cmd: List[str]) -> None:
@@ -131,35 +151,38 @@ class CodeQLDockerExecutor:
                 )
                 raise RuntimeError(msg) from e
 
-        # [1/2] Create CodeQL database (override entrypoint to codeql)
-        print(f"[1/2] Creating CodeQL database for {src_path.name}...")
-        create_cmd = [
-            "docker",
-            "run",
-            "--rm",
-            "--entrypoint",
-            "codeql",  # IMPORTANT: override the container's startup script
-            "-v",
-            f"{src_path.parent}:/work/src",
-            "-v",
-            f"{db_dir}:/work/db",
-        ]
-        # extra docker args (resources, user, etc.)
-        if self.docker_args:
-            create_cmd.extend(self.docker_args)
-
-        create_cmd.extend(
-            [
-                self.docker_image,
-                "database",
-                "create",
-                "/work/db",
-                "--language=javascript",
-                "--source-root=/work/src",
+        # [1/2] Create CodeQL database (if needed)
+        if not skip_db_creation:
+            print(f"[1/2] Creating CodeQL database for {src_path.name}...")
+            create_cmd = [
+                "docker",
+                "run",
+                "--rm",
+                "--entrypoint",
+                "codeql",  # IMPORTANT: override the container's startup script
+                "-v",
+                f"{src_path.parent}:/work/src",
+                "-v",
+                f"{db_dir}:/work/db",
             ]
-        )
+            # extra docker args (resources, user, etc.)
+            if self.docker_args:
+                create_cmd.extend(self.docker_args)
 
-        run_cmd(create_cmd)
+            create_cmd.extend(
+                [
+                    self.docker_image,
+                    "database",
+                    "create",
+                    "/work/db",
+                    "--language=javascript",
+                    "--source-root=/work/src",
+                ]
+            )
+
+            run_cmd(create_cmd)
+        else:
+            print("[1/2] Skipping database creation (using existing database)")
 
         # [2/2] Analyze the database
         print("[2/2] Running CodeQL analysis...")
@@ -200,11 +223,20 @@ class CodeQLDockerExecutor:
         self,
         src_path: Path,
         query_suite: str,
+        database_path: Optional[str] = None,
     ) -> str:
         """Analyze using an existing running container with docker exec."""
         work_dir = Path(tempfile.mkdtemp())
         out_dir = work_dir / "out"
         out_dir.mkdir(parents=True, exist_ok=True)
+
+        # Handle database path
+        if database_path:
+            print(f"⚠️  Note: Running container mode with existing database not fully supported yet.")
+            print(f"    Database path {database_path} will be ignored, creating new database in container.")
+            skip_db_creation = False
+        else:
+            skip_db_creation = False
 
         # Container paths
         container_src_dir = "/work/src"

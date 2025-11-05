@@ -67,6 +67,7 @@ class CodeQLLocalExecutor:
         self,
         source_file: str,
         query_suite: str = "javascript-security-extended.qls",
+        database_path: Optional[str] = None,
     ) -> str:
         """
         Analyze a JavaScript file for vulnerabilities.
@@ -74,23 +75,42 @@ class CodeQLLocalExecutor:
         Args:
             source_file: Path to the JavaScript file to analyze
             query_suite: CodeQL query suite to use (default: javascript-security-extended.qls)
+            database_path: Optional path to existing CodeQL database. If provided, skips database creation.
+                          If None, checks CODEQL_DATABASE_PATH environment variable, then creates new DB.
 
         Returns:
             Path to the generated SARIF report
 
         Raises:
-            FileNotFoundError: If source file doesn't exist
+            FileNotFoundError: If source file or database doesn't exist
             RuntimeError: If CodeQL commands fail
         """
         src_path = Path(source_file).resolve()
         if not src_path.exists():
             raise FileNotFoundError(f"❌ Source file not found: {src_path}")
 
-        # Create temporary directories for database and output
+        # Check for existing database
+        db_path_to_use = database_path or os.getenv("CODEQL_DATABASE_PATH")
+
+        # Create temporary directories for output (and database if needed)
         work_dir = Path(tempfile.mkdtemp())
-        db_dir = work_dir / "codeql-db"
         out_dir = work_dir / "out"
         out_dir.mkdir(parents=True, exist_ok=True)
+
+        if db_path_to_use:
+            # Use existing database
+            db_dir = Path(db_path_to_use).resolve()
+            if not db_dir.exists():
+                raise FileNotFoundError(
+                    f"❌ Specified CodeQL database not found: {db_dir}\n"
+                    f"Please check the path or remove CODEQL_DATABASE_PATH to create a new database."
+                )
+            print(f"♻️  Using existing CodeQL database: {db_dir}")
+            skip_db_creation = True
+        else:
+            # Create new database
+            db_dir = work_dir / "codeql-db"
+            skip_db_creation = False
 
         # Helper to run commands with better error reporting
         def run_cmd(cmd: list[str], step_name: str) -> None:
@@ -131,17 +151,20 @@ class CodeQLLocalExecutor:
                 )
                 raise RuntimeError(msg) from e
 
-        # [1/2] Create CodeQL database
-        print(f"[1/2] Creating CodeQL database for {src_path.name}...")
-        create_cmd = [
-            str(self.codeql_path),
-            "database",
-            "create",
-            str(db_dir),
-            "--language=javascript",
-            f"--source-root={src_path.parent}",
-        ]
-        run_cmd(create_cmd, "Database creation")
+        # [1/2] Create CodeQL database (if needed)
+        if not skip_db_creation:
+            print(f"[1/2] Creating CodeQL database for {src_path.name}...")
+            create_cmd = [
+                str(self.codeql_path),
+                "database",
+                "create",
+                str(db_dir),
+                "--language=javascript",
+                f"--source-root={src_path.parent}",
+            ]
+            run_cmd(create_cmd, "Database creation")
+        else:
+            print("[1/2] Skipping database creation (using existing database)")
 
         # [2/2] Analyze the database
         print("[2/2] Running CodeQL analysis...")

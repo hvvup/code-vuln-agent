@@ -18,6 +18,11 @@ class CodeQLToolInput(BaseModel):
         default="javascript-security-extended.qls",
         description="Optional CodeQL query suite to use (default: javascript-security-extended.qls)",
     )
+    database_path: Optional[str] = Field(
+        default=None,
+        description="Optional path to existing CodeQL database. If provided, skips database creation for faster analysis. "
+        "If not provided, checks CODEQL_DATABASE_PATH environment variable, then creates a new database.",
+    )
 
 
 class CodeQLTool(BaseTool):
@@ -46,6 +51,7 @@ class CodeQLTool(BaseTool):
         self,
         source_file: str,
         query_suite: Optional[str] = "javascript-security-extended.qls",
+        database_path: Optional[str] = None,
     ):
         """
         Executes CodeQL analysis using local CLI or Docker based on configuration.
@@ -53,6 +59,8 @@ class CodeQLTool(BaseTool):
         Checks CODEQL_CLI_PATH environment variable:
         - If set: Uses local CodeQL CLI installation
         - If not set: Uses Docker-based execution
+
+        If database_path is provided or CODEQL_DATABASE_PATH is set, uses existing database.
         """
         codeql_cli_path = os.getenv("CODEQL_CLI_PATH")
 
@@ -68,6 +76,7 @@ class CodeQLTool(BaseTool):
         sarif_path = executor.analyze_file(
             source_file=source_file,
             query_suite=query_suite,
+            database_path=database_path,
         )
         return sarif_path
 
