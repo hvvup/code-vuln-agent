@@ -288,3 +288,246 @@ class CodeQLDockerExecutor:
 
         print(f"✅ Analysis complete! SARIF saved at: {sarif_path}")
         return str(sarif_path)
+
+    def analyze_repository(
+        self,
+        repository_path: str,
+        query_suite: str = "javascript-security-extended.qls",
+        language: str = "javascript",
+    ) -> str:
+        """
+        Analyze an entire repository for vulnerabilities.
+
+        Args:
+            repository_path: Path to the repository root directory to analyze
+            query_suite: CodeQL query suite to use
+            language: CodeQL language to analyze (default: javascript)
+
+        Returns:
+            Path to the generated SARIF report
+        """
+        repo_path = Path(repository_path).resolve()
+        if not repo_path.exists():
+            raise FileNotFoundError(f"❌ Repository path not found: {repo_path}")
+        if not repo_path.is_dir():
+            raise ValueError(f"❌ Path is not a directory: {repo_path}")
+
+        # Use different execution modes based on container_id
+        if self.container_id:
+            return self._analyze_repository_with_running_container(
+                repo_path, query_suite, language
+            )
+        else:
+            return self._analyze_repository_with_ephemeral_container(
+                repo_path, query_suite, language
+            )
+
+    def _analyze_repository_with_ephemeral_container(
+        self,
+        repo_path: Path,
+        query_suite: str,
+        language: str,
+    ) -> str:
+        """Analyze repository using ephemeral docker run --rm containers."""
+        work_dir = Path(tempfile.mkdtemp())
+        db_dir = work_dir / "codeql-db"
+        out_dir = work_dir / "out"
+        db_dir.mkdir(parents=True, exist_ok=True)
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        # Helper to run docker command and raise clearer error with output
+        def run_cmd(cmd: List[str]) -> None:
+            try:
+                completed = subprocess.run(
+                    cmd,
+                    check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    env=os.environ.copy(),
+                )
+            except subprocess.CalledProcessError as e:
+                msg = (
+                    f"Command failed (exit {e.returncode}).\n"
+                    f"Command: {' '.join(e.cmd)}\n"
+                    f"stdout:\n{e.stdout}\n\nstderr:\n{e.stderr}\n"
+                )
+                raise RuntimeError(msg) from e
+
+        # [1/2] Create CodeQL database for the entire repository
+        print(f"[1/2] Creating CodeQL database for repository at {repo_path}...")
+        create_cmd = [
+            "docker",
+            "run",
+            "--rm",
+            "--entrypoint",
+            "codeql",
+            "-v",
+            f"{repo_path}:/work/src",
+            "-v",
+            f"{db_dir}:/work/db",
+        ]
+        if self.docker_args:
+            create_cmd.extend(self.docker_args)
+
+        create_cmd.extend(
+            [
+                self.docker_image,
+                "database",
+                "create",
+                "/work/db",
+                f"--language={language}",
+                "--source-root=/work/src",
+            ]
+        )
+
+        run_cmd(create_cmd)
+
+        # [2/2] Analyze the database
+        print("[2/2] Running CodeQL analysis...")
+        sarif_path = out_dir / "codeql-results.sarif"
+        analyze_cmd = [
+            "docker",
+            "run",
+            "--rm",
+            "--entrypoint",
+            "codeql",
+            "-v",
+            f"{db_dir}:/work/db",
+            "-v",
+            f"{out_dir}:/work/out",
+        ]
+        if self.docker_args:
+            analyze_cmd.extend(self.docker_args)
+
+        analyze_cmd.extend(
+            [
+                self.docker_image,
+                "database",
+                "analyze",
+                "/work/db",
+                query_suite,
+                "--format=sarifv2.1.0",
+                "--output",
+                f"/work/out/{sarif_path.name}",
+            ]
+        )
+
+        run_cmd(analyze_cmd)
+
+        print(f"✅ Repository analysis complete! SARIF saved at: {sarif_path}")
+        return str(sarif_path)
+
+    def _analyze_repository_with_running_container(
+        self,
+        repo_path: Path,
+        query_suite: str,
+        language: str,
+    ) -> str:
+        """Analyze repository using an existing running container with docker exec."""
+        work_dir = Path(tempfile.mkdtemp())
+        out_dir = work_dir / "out"
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        # Container paths
+        container_src_dir = "/work/src"
+        container_db_dir = "/work/db"
+        container_out_dir = "/work/out"
+
+        # Helper to run docker exec commands
+        def run_exec(cmd: List[str]) -> None:
+            try:
+                completed = subprocess.run(
+                    cmd,
+                    check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    env=os.environ.copy(),
+                )
+            except subprocess.CalledProcessError as e:
+                msg = (
+                    f"Command failed (exit {e.returncode}).\n"
+                    f"Command: {' '.join(e.cmd)}\n"
+                    f"stdout:\n{e.stdout}\n\nstderr:\n{e.stderr}\n"
+                )
+                raise RuntimeError(msg) from e
+
+        # [0/3] Copy repository to container (using tar for directories)
+        print(f"[0/3] Copying repository to container...")
+        # Create a tar archive of the repository
+        import tarfile
+
+        repo_tar = work_dir / "repo.tar"
+        with tarfile.open(repo_tar, "w") as tar:
+            tar.add(repo_path, arcname=".")
+
+        # Copy tar to container
+        copy_cmd = [
+            "docker",
+            "cp",
+            str(repo_tar),
+            f"{self.container_id}:{container_src_dir}/repo.tar",
+        ]
+        run_exec(copy_cmd)
+
+        # Extract in container
+        extract_cmd = [
+            "docker",
+            "exec",
+            self.container_id,
+            "tar",
+            "-xf",
+            f"{container_src_dir}/repo.tar",
+            "-C",
+            container_src_dir,
+        ]
+        run_exec(extract_cmd)
+
+        # [1/3] Create CodeQL database inside the container
+        print(f"[1/3] Creating CodeQL database in container {self.container_id}...")
+        create_cmd = [
+            "docker",
+            "exec",
+            self.container_id,
+            "codeql",
+            "database",
+            "create",
+            container_db_dir,
+            f"--language={language}",
+            f"--source-root={container_src_dir}",
+            "--overwrite",
+        ]
+        run_exec(create_cmd)
+
+        # [2/3] Analyze the database
+        print("[2/3] Running CodeQL analysis...")
+        sarif_name = "codeql-results.sarif"
+        analyze_cmd = [
+            "docker",
+            "exec",
+            self.container_id,
+            "codeql",
+            "database",
+            "analyze",
+            container_db_dir,
+            query_suite,
+            "--format=sarifv2.1.0",
+            "--output",
+            f"{container_out_dir}/{sarif_name}",
+        ]
+        run_exec(analyze_cmd)
+
+        # [3/3] Copy SARIF result from container to host
+        print("[3/3] Copying results from container...")
+        sarif_path = out_dir / sarif_name
+        copy_result_cmd = [
+            "docker",
+            "cp",
+            f"{self.container_id}:{container_out_dir}/{sarif_name}",
+            str(sarif_path),
+        ]
+        run_exec(copy_result_cmd)
+
+        print(f"✅ Repository analysis complete! SARIF saved at: {sarif_path}")
+        return str(sarif_path)

@@ -63,17 +63,26 @@ class JavaScriptParser:
             "tolerant": True,
         }
 
-        if parse_as_module:
-            parser_fn = getattr(esprima, "parse_module", None) or getattr(esprima, "parseModule")
-        else:
-            parser_fn = getattr(esprima, "parse_script", None) or getattr(esprima, "parseScript")
+        try:
+            if parse_as_module:
+                parser_fn = getattr(esprima, "parse_module", None) or getattr(esprima, "parseModule")
+            else:
+                parser_fn = getattr(esprima, "parse_script", None) or getattr(esprima, "parseScript")
 
-        program = parser_fn(source, **parse_kwargs)
-        if hasattr(program, "toDict"):
-            return program.toDict()
-        if isinstance(program, dict):
-            return program
-        raise TypeError("Unexpected AST type returned by esprima parser")
+            program = parser_fn(source, **parse_kwargs)
+            if hasattr(program, "toDict"):
+                return program.toDict()
+            if isinstance(program, dict):
+                return program
+            raise TypeError("Unexpected AST type returned by esprima parser")
+        except Exception as e:
+            # Provide more context about the parsing error
+            error_msg = f"Failed to parse JavaScript: {str(e)}"
+            if hasattr(e, 'description'):
+                error_msg += f" - {e.description}"
+            if hasattr(e, 'lineNumber'):
+                error_msg += f" at line {e.lineNumber}"
+            raise ValueError(error_msg) from e
 
     def _should_parse_as_module(self, source: str, module_hint: str) -> bool:
         if module_hint == "module":

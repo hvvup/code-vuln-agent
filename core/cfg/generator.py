@@ -107,7 +107,23 @@ class CFGGenerator:
         if generation_input.language.lower() != "javascript":
             raise ValueError("CFGGenerator only supports JavaScript inputs")
 
-        file_cfgs = [self._process_file(file_path) for file_path in generation_input.files]
+        # Process files with error handling
+        file_cfgs = []
+        for file_path in generation_input.files:
+            try:
+                file_cfg = self._process_file(file_path)
+                file_cfgs.append(file_cfg)
+            except Exception as e:
+                # Log error but continue with other files
+                print(f"⚠️  Warning: Failed to process {file_path}: {e}")
+                print(f"   Skipping this file and continuing with others...")
+                # Create an empty FileCFG to maintain structure
+                from .structures import FileCFG, FunctionCFG
+                empty_cfg = FileCFG(
+                    file_path=str(file_path),
+                    functions=[],
+                )
+                file_cfgs.append(empty_cfg)
 
         output_dir = Path(self.options.output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)

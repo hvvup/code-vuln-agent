@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from langchain.tools import BaseTool
@@ -52,8 +53,29 @@ class CFGGeneratorTool(BaseTool):
             "language": language,
             "options": options or {}
         }
-        output_paths = self._generator.generate(payload)
-        return json.dumps({key: str(path) for key, path in output_paths.items()}, indent=2)
+        
+        try:
+            output_paths = self._generator.generate(payload)
+            return json.dumps({key: str(path) for key, path in output_paths.items()}, indent=2)
+        except Exception as e:
+            # Return error information but don't crash
+            error_info = {
+                "error": f"CFG generation failed: {str(e)}",
+                "files_processed": len(files),
+                "note": "Some files may have been skipped due to parsing errors. Check warnings above.",
+            }
+            # Try to get partial results if available
+            try:
+                # Check if any output was generated before the error
+                import os
+                output_dir = Path(options.get("outputDir", "output") if options else "output")
+                cfg_file = output_dir / "cfg.json"
+                if cfg_file.exists():
+                    error_info["partial_results"] = str(cfg_file)
+            except:
+                pass
+            
+            return json.dumps(error_info, indent=2)
 
     async def _arun(self, *args: Any, **kwargs: Any) -> str:
         """Async execution not supported."""
