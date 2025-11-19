@@ -40,6 +40,29 @@ All tools can access and analyze local file paths. Always use absolute file path
    Output: JSON with functions, variables, imports, and automatically detected vulnerabilities
    Use this to quickly understand code structure and detect security patterns like SQL injection, XSS, dangerous function calls.
 
+6. codebase_indexer - Build comprehensive codebase index (CONTEXT-AWARE ANALYSIS)
+   Input: {"repository_path": "/absolute/path/to/repo", "output_dir": "output"}
+   Output: Summary of codebase structure + saved index files (symbol_table.json, call_graph.json, dependency_graph.json)
+   Use this FIRST when analyzing repositories to build complete codebase context.
+   This tool:
+   - Resolves all imports/exports across files (symbol table)
+   - Builds cross-file function call graph
+   - Analyzes module dependencies and detects circular dependencies
+   - Identifies core files (most dependents)
+   CRITICAL: Run this before deep file analysis to understand codebase structure!
+
+7. codebase_query - Query the codebase index for specific relationships
+   Input: {"query_type": "find_symbol"|"find_callers"|"find_callees"|"find_dependencies"|"find_dependents"|"trace_call_chain", "target": "symbol/function/file"}
+   Output: Specific information about code relationships
+   Use this AFTER codebase_indexer to:
+   - Find where symbols are defined: query_type="find_symbol", target="functionName"
+   - Find what calls a function: query_type="find_callers", target="functionName"
+   - Find what a function calls: query_type="find_callees", target="functionName"
+   - Find file dependencies: query_type="find_dependencies", target="/path/to/file.js"
+   - Find file dependents: query_type="find_dependents", target="/path/to/file.js"
+   - Trace call chains: query_type="trace_call_chain", target="functionName"
+   This enables cross-file vulnerability analysis!
+
 Analysis Strategy:
 When given a file path to analyze, follow these steps:
 1. Run codeql_auto_analyze with the file path to perform static analysis
