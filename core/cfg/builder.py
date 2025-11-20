@@ -78,14 +78,27 @@ class CFGBuilder:
         return self._build_function(function)
 
     def _build_nested_functions(self) -> List[FunctionCFG]:
-        return [self._build_function(fn) for fn in self._collect_function_nodes(self.program)]
+        return [
+            self._build_function(fn)
+            for fn in self._collect_function_nodes(self.program)
+        ]
 
-    def _collect_function_nodes(self, node: Dict[str, Any], parent_name: Optional[str] = None) -> List[FunctionLike]:
+    def _collect_function_nodes(
+        self, node: Dict[str, Any], parent_name: Optional[str] = None
+    ) -> List[FunctionLike]:
         functions: List[FunctionLike] = []
         node_type = node.get("type")
-        if node_type in {"FunctionDeclaration", "FunctionExpression", "ArrowFunctionExpression"}:
+        if node_type in {
+            "FunctionDeclaration",
+            "FunctionExpression",
+            "ArrowFunctionExpression",
+        }:
             name = self._function_name(node, parent_name)
-            functions.append(FunctionLike(node=node, name=name, span=span_from_node(node), parent=parent_name))
+            functions.append(
+                FunctionLike(
+                    node=node, name=name, span=span_from_node(node), parent=parent_name
+                )
+            )
             parent_name = name
 
         for child in self._iter_child_nodes(node):
@@ -94,7 +107,9 @@ class CFGBuilder:
             elif isinstance(child, list):
                 for element in child:
                     if isinstance(element, dict):
-                        functions.extend(self._collect_function_nodes(element, parent_name))
+                        functions.extend(
+                            self._collect_function_nodes(element, parent_name)
+                        )
         return functions
 
     def _function_name(self, node: Dict[str, Any], parent: Optional[str]) -> str:
@@ -154,7 +169,9 @@ class CFGBuilder:
 
         self._finalize_finally_edges()
 
-        function_span = function.span or merge_spans(node.span for node in self.nodes.values())
+        function_span = function.span or merge_spans(
+            node.span for node in self.nodes.values()
+        )
         self._function_counter += 1
         func_id = f"f_{self._function_counter}"
 
@@ -176,7 +193,9 @@ class CFGBuilder:
     # ------------------------------------------------------------------
     # Statement dispatch
 
-    def _build_statement_list(self, statements: Sequence[Optional[Dict[str, Any]]], next_targets: List[str]) -> BuildResult:
+    def _build_statement_list(
+        self, statements: Sequence[Optional[Dict[str, Any]]], next_targets: List[str]
+    ) -> BuildResult:
         if not statements:
             return BuildResult(entry=None, fallthroughs=[])
 
@@ -197,7 +216,9 @@ class CFGBuilder:
 
         return BuildResult(entry=entry, fallthroughs=fallthroughs)
 
-    def _build_statement(self, statement: Optional[Dict[str, Any]], next_targets: List[str]) -> BuildResult:
+    def _build_statement(
+        self, statement: Optional[Dict[str, Any]], next_targets: List[str]
+    ) -> BuildResult:
         if not statement:
             return BuildResult(entry=None, fallthroughs=[])
 
@@ -221,7 +242,13 @@ class CFGBuilder:
         if node_type == "IfStatement":
             return self._build_if(statement, next_targets)
 
-        if node_type in {"WhileStatement", "DoWhileStatement", "ForStatement", "ForInStatement", "ForOfStatement"}:
+        if node_type in {
+            "WhileStatement",
+            "DoWhileStatement",
+            "ForStatement",
+            "ForInStatement",
+            "ForOfStatement",
+        }:
             return self._build_loop(statement, next_targets)
 
         if node_type == "SwitchStatement":
@@ -242,7 +269,9 @@ class CFGBuilder:
     # ------------------------------------------------------------------
     # Simple statement handling
 
-    def _build_simple_statement(self, statement: Dict[str, Any], next_targets: List[str]) -> BuildResult:
+    def _build_simple_statement(
+        self, statement: Dict[str, Any], next_targets: List[str]
+    ) -> BuildResult:
         node_type = statement.get("type")
         kind_map = {
             "ExpressionStatement": "Linear",
@@ -273,7 +302,11 @@ class CFGBuilder:
 
         if node_type == "BreakStatement":
             label = self._extract_label(statement)
-            targets = self._label_break_targets(label) if label else self._nearest_break_targets()
+            targets = (
+                self._label_break_targets(label)
+                if label
+                else self._nearest_break_targets()
+            )
             targets = targets or [self.exit_node_id]
             routed = self._wrap_targets_with_finally(targets)
             self._connect_fallthroughs([node.id], routed, "Next")
@@ -281,7 +314,11 @@ class CFGBuilder:
 
         if node_type == "ContinueStatement":
             label = self._extract_label(statement)
-            targets = self._label_continue_targets(label) if label else self._nearest_continue_targets()
+            targets = (
+                self._label_continue_targets(label)
+                if label
+                else self._nearest_continue_targets()
+            )
             targets = targets or [self.exit_node_id]
             routed = self._wrap_targets_with_finally(targets)
             self._connect_fallthroughs([node.id], routed, "Next")
@@ -300,7 +337,9 @@ class CFGBuilder:
     # ------------------------------------------------------------------
     # Conditionals
 
-    def _build_if(self, statement: Dict[str, Any], next_targets: List[str]) -> BuildResult:
+    def _build_if(
+        self, statement: Dict[str, Any], next_targets: List[str]
+    ) -> BuildResult:
         meta = {"op": "IfStatement", "cond": self._snippet(statement.get("test"))}
         branch_node = self._create_node("Branch", [statement], meta)
 
@@ -330,7 +369,9 @@ class CFGBuilder:
     # ------------------------------------------------------------------
     # Loops
 
-    def _build_loop(self, statement: Dict[str, Any], next_targets: List[str]) -> BuildResult:
+    def _build_loop(
+        self, statement: Dict[str, Any], next_targets: List[str]
+    ) -> BuildResult:
         node_type = statement.get("type")
         if node_type == "WhileStatement":
             return self._build_while(statement, next_targets)
@@ -342,7 +383,9 @@ class CFGBuilder:
             return self._build_for_in_of(statement, next_targets)
         return BuildResult(entry=None, fallthroughs=list(next_targets))
 
-    def _build_while(self, statement: Dict[str, Any], next_targets: List[str]) -> BuildResult:
+    def _build_while(
+        self, statement: Dict[str, Any], next_targets: List[str]
+    ) -> BuildResult:
         meta = {"op": "WhileStatement", "cond": self._snippet(statement.get("test"))}
         header = self._create_node("While", [statement], meta)
 
@@ -350,7 +393,9 @@ class CFGBuilder:
         continue_targets = [header.id]
         self._register_pending_label(break_targets, continue_targets)
 
-        self.loop_stack.append(LoopContext(break_targets=break_targets, continue_targets=continue_targets))
+        self.loop_stack.append(
+            LoopContext(break_targets=break_targets, continue_targets=continue_targets)
+        )
         self.break_stack.append(break_targets)
         self.continue_stack.append(continue_targets)
 
@@ -370,7 +415,9 @@ class CFGBuilder:
 
         return BuildResult(entry=header.id, fallthroughs=false_targets)
 
-    def _build_do_while(self, statement: Dict[str, Any], next_targets: List[str]) -> BuildResult:
+    def _build_do_while(
+        self, statement: Dict[str, Any], next_targets: List[str]
+    ) -> BuildResult:
         meta = {"op": "DoWhileStatement", "cond": self._snippet(statement.get("test"))}
         header = self._create_node("DoWhile", [statement], meta)
 
@@ -378,7 +425,9 @@ class CFGBuilder:
         continue_targets = [header.id]
         self._register_pending_label(break_targets, continue_targets)
 
-        self.loop_stack.append(LoopContext(break_targets=break_targets, continue_targets=continue_targets))
+        self.loop_stack.append(
+            LoopContext(break_targets=break_targets, continue_targets=continue_targets)
+        )
         self.break_stack.append(break_targets)
         self.continue_stack.append(continue_targets)
 
@@ -399,21 +448,27 @@ class CFGBuilder:
 
         return BuildResult(entry=loop_entry, fallthroughs=false_targets)
 
-    def _build_for(self, statement: Dict[str, Any], next_targets: List[str]) -> BuildResult:
+    def _build_for(
+        self, statement: Dict[str, Any], next_targets: List[str]
+    ) -> BuildResult:
         meta = {"op": "ForStatement", "cond": self._snippet(statement.get("test"))}
         header = self._create_node("For", [statement], meta)
 
         update = statement.get("update")
         if update:
             update_result = self._build_expression_as_statement(update, [header.id])
-            continue_targets = [update_result.entry] if update_result.entry else [header.id]
+            continue_targets = (
+                [update_result.entry] if update_result.entry else [header.id]
+            )
         else:
             continue_targets = [header.id]
 
         break_targets = list(next_targets)
         self._register_pending_label(break_targets, continue_targets)
 
-        self.loop_stack.append(LoopContext(break_targets=break_targets, continue_targets=continue_targets))
+        self.loop_stack.append(
+            LoopContext(break_targets=break_targets, continue_targets=continue_targets)
+        )
         self.break_stack.append(break_targets)
         self.continue_stack.append(continue_targets)
 
@@ -444,7 +499,9 @@ class CFGBuilder:
 
         return BuildResult(entry=entry, fallthroughs=false_targets)
 
-    def _build_for_in_of(self, statement: Dict[str, Any], next_targets: List[str]) -> BuildResult:
+    def _build_for_in_of(
+        self, statement: Dict[str, Any], next_targets: List[str]
+    ) -> BuildResult:
         op = statement.get("type")
         meta = {
             "op": op,
@@ -457,7 +514,9 @@ class CFGBuilder:
         continue_targets = [header.id]
         self._register_pending_label(break_targets, continue_targets)
 
-        self.loop_stack.append(LoopContext(break_targets=break_targets, continue_targets=continue_targets))
+        self.loop_stack.append(
+            LoopContext(break_targets=break_targets, continue_targets=continue_targets)
+        )
         self.break_stack.append(break_targets)
         self.continue_stack.append(continue_targets)
 
@@ -480,8 +539,13 @@ class CFGBuilder:
     # ------------------------------------------------------------------
     # Switch
 
-    def _build_switch(self, statement: Dict[str, Any], next_targets: List[str]) -> BuildResult:
-        meta = {"op": "SwitchStatement", "discriminant": self._snippet(statement.get("discriminant"))}
+    def _build_switch(
+        self, statement: Dict[str, Any], next_targets: List[str]
+    ) -> BuildResult:
+        meta = {
+            "op": "SwitchStatement",
+            "discriminant": self._snippet(statement.get("discriminant")),
+        }
         switch_node = self._create_node("Switch", [statement], meta)
 
         break_targets = list(next_targets)
@@ -493,7 +557,9 @@ class CFGBuilder:
         case_entries: List[Tuple[Dict[str, Any], BuildResult]] = []
 
         for case in reversed(cases):
-            case_result = self._build_statement_list(case.get("consequent", []), fallthrough_targets)
+            case_result = self._build_statement_list(
+                case.get("consequent", []), fallthrough_targets
+            )
             case_entries.append((case, case_result))
             if case_result.entry:
                 fallthrough_targets = [case_result.entry]
@@ -516,20 +582,26 @@ class CFGBuilder:
     # ------------------------------------------------------------------
     # Try/Catch/Finally
 
-    def _build_try(self, statement: Dict[str, Any], next_targets: List[str]) -> BuildResult:
+    def _build_try(
+        self, statement: Dict[str, Any], next_targets: List[str]
+    ) -> BuildResult:
         final_context: Optional[FinallyContext] = None
         final_targets = self._wrap_targets_with_finally(next_targets)
 
         finalizer = statement.get("finalizer")
         if finalizer:
-            final_result = self._build_statement_list(finalizer.get("body", []), final_targets)
+            final_result = self._build_statement_list(
+                finalizer.get("body", []), final_targets
+            )
             final_node = self._create_node("Handler", [finalizer], {"op": "Finally"})
             if final_result.entry:
                 self._add_edge(final_node.id, final_result.entry, "Next")
                 exits = final_result.fallthroughs or [final_result.entry]
             else:
                 exits = [final_node.id]
-            final_context = FinallyContext(entry=final_node.id, exits=list(exits), targets=set(final_targets))
+            final_context = FinallyContext(
+                entry=final_node.id, exits=list(exits), targets=set(final_targets)
+            )
             self.finally_stack.append(final_context)
             self.finally_contexts.append(final_context)
             final_targets = [final_node.id]
@@ -547,7 +619,11 @@ class CFGBuilder:
 
         self.try_stack.append(TryContext(catch_target=catch_entry))
 
-        try_body_targets = final_targets if final_context else self._wrap_targets_with_finally(next_targets)
+        try_body_targets = (
+            final_targets
+            if final_context
+            else self._wrap_targets_with_finally(next_targets)
+        )
         if final_context:
             try_body_targets = [final_context.entry]
 
@@ -576,7 +652,9 @@ class CFGBuilder:
     # ------------------------------------------------------------------
     # Labeled / Unknown
 
-    def _build_labeled(self, statement: Dict[str, Any], next_targets: List[str]) -> BuildResult:
+    def _build_labeled(
+        self, statement: Dict[str, Any], next_targets: List[str]
+    ) -> BuildResult:
         label = statement.get("label", {}).get("name")
         self.label_context_stack.append({})
         prev_pending = self.pending_label
@@ -598,8 +676,12 @@ class CFGBuilder:
             self._connect_fallthroughs([label_node.id], next_targets, "Next")
         return BuildResult(entry=label_node.id, fallthroughs=fallthroughs)
 
-    def _build_unknown(self, statement: Dict[str, Any], next_targets: List[str], kind: str) -> BuildResult:
-        node = self._create_node(kind, [statement], meta={"op": statement.get("type", "Unknown")})
+    def _build_unknown(
+        self, statement: Dict[str, Any], next_targets: List[str], kind: str
+    ) -> BuildResult:
+        node = self._create_node(
+            kind, [statement], meta={"op": statement.get("type", "Unknown")}
+        )
         routed = self._wrap_targets_with_finally(next_targets)
         self._connect_fallthroughs([node.id], routed, "Next")
         return BuildResult(entry=node.id, fallthroughs=[node.id])
@@ -607,14 +689,23 @@ class CFGBuilder:
     # ------------------------------------------------------------------
     # Expression helper
 
-    def _build_expression_as_statement(self, expression: Dict[str, Any], next_targets: List[str]) -> BuildResult:
-        expr_node = {"type": "ExpressionStatement", "expression": expression, "loc": expression.get("loc"), "range": expression.get("range")}
+    def _build_expression_as_statement(
+        self, expression: Dict[str, Any], next_targets: List[str]
+    ) -> BuildResult:
+        expr_node = {
+            "type": "ExpressionStatement",
+            "expression": expression,
+            "loc": expression.get("loc"),
+            "range": expression.get("range"),
+        }
         return self._build_simple_statement(expr_node, next_targets)
 
     # ------------------------------------------------------------------
     # Context helpers
 
-    def _register_pending_label(self, break_targets: List[str], continue_targets: List[str]) -> None:
+    def _register_pending_label(
+        self, break_targets: List[str], continue_targets: List[str]
+    ) -> None:
         if self.pending_label is None or not self.label_context_stack:
             return
         scope = self.label_context_stack[-1]
@@ -654,7 +745,13 @@ class CFGBuilder:
     # ------------------------------------------------------------------
     # Node / edge helpers
 
-    def _create_node(self, kind: str, ast_nodes: Optional[Iterable[Dict[str, Any]]], span: Optional[Span] = None, meta: Optional[Dict[str, Any]] = None) -> CFGNode:
+    def _create_node(
+        self,
+        kind: str,
+        ast_nodes: Optional[Iterable[Dict[str, Any]]],
+        span: Optional[Span] = None,
+        meta: Optional[Dict[str, Any]] = None,
+    ) -> CFGNode:
         node_id = self.factory.new_id()
         ast_list = [node for node in (ast_nodes or []) if node]
         if span is None:
@@ -671,16 +768,30 @@ class CFGBuilder:
         self.nodes[node_id] = cfg_node
         return cfg_node
 
-    def _add_edge(self, source: Optional[str], target: Optional[str], edge_type: str, label: Optional[str] = None) -> None:
+    def _add_edge(
+        self,
+        source: Optional[str],
+        target: Optional[str],
+        edge_type: str,
+        label: Optional[str] = None,
+    ) -> None:
         if not source or not target:
             return
         key = (source, target, edge_type, label)
         if key in self.edge_set:
             return
         self.edge_set.add(key)
-        self.edges.append(CFGEdge(source=source, target=target, edge_type=edge_type, label=label))
+        self.edges.append(
+            CFGEdge(source=source, target=target, edge_type=edge_type, label=label)
+        )
 
-    def _connect_fallthroughs(self, sources: Iterable[str], targets: Iterable[str], edge_type: str = "Next", label: Optional[str] = None) -> None:
+    def _connect_fallthroughs(
+        self,
+        sources: Iterable[str],
+        targets: Iterable[str],
+        edge_type: str = "Next",
+        label: Optional[str] = None,
+    ) -> None:
         targets_list = [t for t in targets if t]
         if not targets_list:
             return
@@ -727,6 +838,8 @@ class CFGBuilder:
 
 
 __all__ = ["CFGBuilder"]
+
+
 @dataclass
 class FunctionLike:
     node: Dict[str, Any]
@@ -783,7 +896,9 @@ class CFGBuilder:
             functions.append(self._build_function(fn))
         return functions
 
-    def _collect_function_nodes(self, node: Dict[str, Any], parent_name: Optional[str] = None) -> List[FunctionLike]:
+    def _collect_function_nodes(
+        self, node: Dict[str, Any], parent_name: Optional[str] = None
+    ) -> List[FunctionLike]:
         functions: List[FunctionLike] = []
         node_type = node.get("type")
 
@@ -808,10 +923,14 @@ class CFGBuilder:
             elif isinstance(child, list):
                 for element in child:
                     if isinstance(element, dict):
-                        functions.extend(self._collect_function_nodes(element, parent_name))
+                        functions.extend(
+                            self._collect_function_nodes(element, parent_name)
+                        )
         return functions
 
-    def _extract_function_name(self, node: Dict[str, Any], parent_name: Optional[str]) -> str:
+    def _extract_function_name(
+        self, node: Dict[str, Any], parent_name: Optional[str]
+    ) -> str:
         identifier = node.get("id")
         if identifier and identifier.get("name"):
             return identifier["name"]
@@ -871,7 +990,9 @@ class CFGBuilder:
         else:
             self._add_edge(entry_id, exit_node.id, "Next")
 
-        function_span = function.span or merge_spans(node.span for node in self.nodes.values())
+        function_span = function.span or merge_spans(
+            node.span for node in self.nodes.values()
+        )
         return FunctionCFG(
             func_id=self._new_func_id(function.name),
             name=function.name,
@@ -881,7 +1002,10 @@ class CFGBuilder:
             edges=self.edges,
             range=function_span,
             file_path=self.file_path,
-            meta={"isAsync": bool(function.node.get("async")), "isGenerator": bool(function.node.get("generator"))},
+            meta={
+                "isAsync": bool(function.node.get("async")),
+                "isGenerator": bool(function.node.get("generator")),
+            },
         )
 
     def _new_func_id(self, name: str) -> str:
@@ -893,7 +1017,9 @@ class CFGBuilder:
     # ------------------------------------------------------------------
     # Statement handling
 
-    def _build_statement_list(self, statements: Sequence[Dict[str, Any]], next_entry: Optional[str]) -> Optional[str]:
+    def _build_statement_list(
+        self, statements: Sequence[Dict[str, Any]], next_entry: Optional[str]
+    ) -> Optional[str]:
         current_next = next_entry
         entry: Optional[str] = None
 
@@ -903,7 +1029,9 @@ class CFGBuilder:
 
         return entry
 
-    def _build_statement(self, statement: Optional[Dict[str, Any]], next_entry: Optional[str]) -> Optional[str]:
+    def _build_statement(
+        self, statement: Optional[Dict[str, Any]], next_entry: Optional[str]
+    ) -> Optional[str]:
         if not statement:
             return next_entry
 
@@ -912,13 +1040,28 @@ class CFGBuilder:
         if node_type == "BlockStatement":
             return self._build_statement_list(statement.get("body", []), next_entry)
 
-        if node_type in {"ExpressionStatement", "VariableDeclaration", "ReturnStatement", "ThrowStatement", "BreakStatement", "ContinueStatement", "DebuggerStatement", "EmptyStatement"}:
+        if node_type in {
+            "ExpressionStatement",
+            "VariableDeclaration",
+            "ReturnStatement",
+            "ThrowStatement",
+            "BreakStatement",
+            "ContinueStatement",
+            "DebuggerStatement",
+            "EmptyStatement",
+        }:
             return self._build_simple_statement(statement, next_entry)
 
         if node_type == "IfStatement":
             return self._build_if(statement, next_entry)
 
-        if node_type in {"WhileStatement", "DoWhileStatement", "ForStatement", "ForInStatement", "ForOfStatement"}:
+        if node_type in {
+            "WhileStatement",
+            "DoWhileStatement",
+            "ForStatement",
+            "ForInStatement",
+            "ForOfStatement",
+        }:
             return self._build_loop(statement, next_entry)
 
         if node_type == "SwitchStatement":
@@ -962,15 +1105,25 @@ class CFGBuilder:
         self.nodes[node_id] = cfg_node
         return cfg_node
 
-    def _add_edge(self, source: Optional[str], target: Optional[str], edge_type: str, label: Optional[str] = None) -> None:
+    def _add_edge(
+        self,
+        source: Optional[str],
+        target: Optional[str],
+        edge_type: str,
+        label: Optional[str] = None,
+    ) -> None:
         if not source or not target:
             return
-        self.edges.append(CFGEdge(source=source, target=target, edge_type=edge_type, label=label))
+        self.edges.append(
+            CFGEdge(source=source, target=target, edge_type=edge_type, label=label)
+        )
 
     # ------------------------------------------------------------------
     # Simple statements
 
-    def _build_simple_statement(self, statement: Dict[str, Any], next_entry: Optional[str]) -> Optional[str]:
+    def _build_simple_statement(
+        self, statement: Dict[str, Any], next_entry: Optional[str]
+    ) -> Optional[str]:
         node_type = statement.get("type")
         kind_map = {
             "ExpressionStatement": "Linear",
@@ -1017,27 +1170,40 @@ class CFGBuilder:
     # ------------------------------------------------------------------
     # Control structures
 
-    def _build_if(self, statement: Dict[str, Any], next_entry: Optional[str]) -> Optional[str]:
+    def _build_if(
+        self, statement: Dict[str, Any], next_entry: Optional[str]
+    ) -> Optional[str]:
         test = statement.get("test")
         meta = {"op": "IfStatement", "cond": self._extract_snippet(test)}
         branch_node = self._create_node(kind="Branch", ast_nodes=[statement], meta=meta)
 
-        consequent_entry = self._build_statement(statement.get("consequent"), next_entry)
+        consequent_entry = self._build_statement(
+            statement.get("consequent"), next_entry
+        )
         alternate_entry = self._build_statement(statement.get("alternate"), next_entry)
 
         if consequent_entry:
             self._add_edge(branch_node.id, consequent_entry, "True", "cond:true")
         else:
-            self._add_edge(branch_node.id, self._wrap_with_finally(next_entry), "True", "cond:true")
+            self._add_edge(
+                branch_node.id, self._wrap_with_finally(next_entry), "True", "cond:true"
+            )
 
         if alternate_entry:
             self._add_edge(branch_node.id, alternate_entry, "False", "cond:false")
         else:
-            self._add_edge(branch_node.id, self._wrap_with_finally(next_entry), "False", "cond:false")
+            self._add_edge(
+                branch_node.id,
+                self._wrap_with_finally(next_entry),
+                "False",
+                "cond:false",
+            )
 
         return branch_node.id
 
-    def _build_loop(self, statement: Dict[str, Any], next_entry: Optional[str]) -> Optional[str]:
+    def _build_loop(
+        self, statement: Dict[str, Any], next_entry: Optional[str]
+    ) -> Optional[str]:
         node_type = statement.get("type")
 
         if node_type == "WhileStatement":
@@ -1050,11 +1216,18 @@ class CFGBuilder:
             return self._build_for_in_of(statement, next_entry)
         return next_entry
 
-    def _build_while(self, statement: Dict[str, Any], next_entry: Optional[str]) -> Optional[str]:
-        meta = {"op": "WhileStatement", "cond": self._extract_snippet(statement.get("test"))}
+    def _build_while(
+        self, statement: Dict[str, Any], next_entry: Optional[str]
+    ) -> Optional[str]:
+        meta = {
+            "op": "WhileStatement",
+            "cond": self._extract_snippet(statement.get("test")),
+        }
         header = self._create_node("While", [statement], meta=meta)
 
-        loop_context = LoopContext(continue_target=header.id, break_target=next_entry or self.exit_node_id)
+        loop_context = LoopContext(
+            continue_target=header.id, break_target=next_entry or self.exit_node_id
+        )
         self.loop_stack.append(loop_context)
         self.break_stack.append(loop_context.break_target)
         self.continue_stack.append(loop_context.continue_target)
@@ -1075,11 +1248,18 @@ class CFGBuilder:
 
         return header.id
 
-    def _build_do_while(self, statement: Dict[str, Any], next_entry: Optional[str]) -> Optional[str]:
-        meta = {"op": "DoWhileStatement", "cond": self._extract_snippet(statement.get("test"))}
+    def _build_do_while(
+        self, statement: Dict[str, Any], next_entry: Optional[str]
+    ) -> Optional[str]:
+        meta = {
+            "op": "DoWhileStatement",
+            "cond": self._extract_snippet(statement.get("test")),
+        }
         header = self._create_node("DoWhile", [statement], meta=meta)
 
-        loop_context = LoopContext(continue_target=header.id, break_target=next_entry or self.exit_node_id)
+        loop_context = LoopContext(
+            continue_target=header.id, break_target=next_entry or self.exit_node_id
+        )
         self.loop_stack.append(loop_context)
         self.break_stack.append(loop_context.break_target)
         self.continue_stack.append(loop_context.continue_target)
@@ -1097,7 +1277,9 @@ class CFGBuilder:
 
         return header.id
 
-    def _build_for(self, statement: Dict[str, Any], next_entry: Optional[str]) -> Optional[str]:
+    def _build_for(
+        self, statement: Dict[str, Any], next_entry: Optional[str]
+    ) -> Optional[str]:
         init = statement.get("init")
         test = statement.get("test")
         update = statement.get("update")
@@ -1105,7 +1287,9 @@ class CFGBuilder:
         test_meta = {"op": "ForStatement", "cond": self._extract_snippet(test)}
         header = self._create_node("For", [statement], meta=test_meta)
 
-        loop_context = LoopContext(continue_target=header.id, break_target=next_entry or self.exit_node_id)
+        loop_context = LoopContext(
+            continue_target=header.id, break_target=next_entry or self.exit_node_id
+        )
         self.loop_stack.append(loop_context)
         self.break_stack.append(loop_context.break_target)
         self.continue_stack.append(loop_context.continue_target)
@@ -1137,12 +1321,20 @@ class CFGBuilder:
         self.continue_stack.pop()
         return header.id
 
-    def _build_for_in_of(self, statement: Dict[str, Any], next_entry: Optional[str]) -> Optional[str]:
+    def _build_for_in_of(
+        self, statement: Dict[str, Any], next_entry: Optional[str]
+    ) -> Optional[str]:
         op = statement.get("type")
-        await_meta = {"op": op, "left": self._extract_snippet(statement.get("left")), "right": self._extract_snippet(statement.get("right"))}
+        await_meta = {
+            "op": op,
+            "left": self._extract_snippet(statement.get("left")),
+            "right": self._extract_snippet(statement.get("right")),
+        }
         header = self._create_node("ForEach", [statement], meta=await_meta)
 
-        loop_context = LoopContext(continue_target=header.id, break_target=next_entry or self.exit_node_id)
+        loop_context = LoopContext(
+            continue_target=header.id, break_target=next_entry or self.exit_node_id
+        )
         self.loop_stack.append(loop_context)
         self.break_stack.append(loop_context.break_target)
         self.continue_stack.append(loop_context.continue_target)
@@ -1158,8 +1350,13 @@ class CFGBuilder:
 
         return header.id
 
-    def _build_switch(self, statement: Dict[str, Any], next_entry: Optional[str]) -> Optional[str]:
-        meta = {"op": "SwitchStatement", "discriminant": self._extract_snippet(statement.get("discriminant"))}
+    def _build_switch(
+        self, statement: Dict[str, Any], next_entry: Optional[str]
+    ) -> Optional[str]:
+        meta = {
+            "op": "SwitchStatement",
+            "discriminant": self._extract_snippet(statement.get("discriminant")),
+        }
         switch_node = self._create_node("Switch", [statement], meta=meta)
 
         break_target = next_entry or self.exit_node_id
@@ -1171,20 +1368,28 @@ class CFGBuilder:
         for index, case in enumerate(cases):
             test = case.get("test")
             label = f"case:{self._extract_snippet(test) if test else 'default'}"
-            case_entry = self._build_statement_list(case.get("consequent", []), fallthrough_target)
+            case_entry = self._build_statement_list(
+                case.get("consequent", []), fallthrough_target
+            )
             edge_type = "Case" if test else "Default"
-            self._add_edge(switch_node.id, case_entry or fallthrough_target, edge_type, label)
+            self._add_edge(
+                switch_node.id, case_entry or fallthrough_target, edge_type, label
+            )
 
             # Fall-through to next case if no break
             if index < len(cases) - 1 and case_entry:
-                next_case_entry = self._build_statement_list(cases[index + 1].get("consequent", []), fallthrough_target)
+                next_case_entry = self._build_statement_list(
+                    cases[index + 1].get("consequent", []), fallthrough_target
+                )
                 if next_case_entry:
                     self._add_edge(case_entry, next_case_entry, "Next", "fall-through")
 
         self.break_stack.pop()
         return switch_node.id
 
-    def _build_try(self, statement: Dict[str, Any], next_entry: Optional[str]) -> Optional[str]:
+    def _build_try(
+        self, statement: Dict[str, Any], next_entry: Optional[str]
+    ) -> Optional[str]:
         meta = {"op": "Try"}
         try_node = self._create_node("Handler", [statement], meta=meta)
 
@@ -1200,16 +1405,22 @@ class CFGBuilder:
         if handler:
             catch_meta = {"op": "Catch", "param": self._extract_catch_param(handler)}
             catch_node = self._create_node("Handler", [handler], meta=catch_meta)
-            catch_entry = self._build_statement(handler.get("body"), finally_entry or final_next)
+            catch_entry = self._build_statement(
+                handler.get("body"), finally_entry or final_next
+            )
             if catch_entry:
                 self._add_edge(catch_node.id, catch_entry, "Next")
             catch_entry = catch_node.id
 
-        self.try_stack.append(TryContext(catch_target=catch_entry, finally_entry=finally_entry))
+        self.try_stack.append(
+            TryContext(catch_target=catch_entry, finally_entry=finally_entry)
+        )
         if finalizer and finally_entry:
             self.finally_stack.append(finally_entry)
 
-        try_entry = self._build_statement(statement.get("block"), finally_entry or final_next)
+        try_entry = self._build_statement(
+            statement.get("block"), finally_entry or final_next
+        )
         if try_entry:
             self._add_edge(try_node.id, try_entry, "Next")
 
@@ -1225,13 +1436,21 @@ class CFGBuilder:
 
         return try_node.id
 
-    def _build_unknown(self, statement: Dict[str, Any], next_entry: Optional[str], kind: str) -> Optional[str]:
-        node = self._create_node(kind=kind, ast_nodes=[statement], meta={"op": statement.get("type", "Unknown")})
+    def _build_unknown(
+        self, statement: Dict[str, Any], next_entry: Optional[str], kind: str
+    ) -> Optional[str]:
+        node = self._create_node(
+            kind=kind,
+            ast_nodes=[statement],
+            meta={"op": statement.get("type", "Unknown")},
+        )
         target = self._wrap_with_finally(next_entry)
         self._add_edge(node.id, target, "Next")
         return node.id
 
-    def _build_labeled(self, statement: Dict[str, Any], next_entry: Optional[str]) -> Optional[str]:
+    def _build_labeled(
+        self, statement: Dict[str, Any], next_entry: Optional[str]
+    ) -> Optional[str]:
         label = statement.get("label", {}).get("name")
         meta = {"op": "LabeledStatement", "label": label}
         node = self._create_node(kind="Linear", ast_nodes=[statement], meta=meta)
@@ -1274,7 +1493,9 @@ class CFGBuilder:
     # ------------------------------------------------------------------
     # Misc helpers
 
-    def _extract_snippet(self, node: Optional[Dict[str, Any]], max_len: int = 80) -> str:
+    def _extract_snippet(
+        self, node: Optional[Dict[str, Any]], max_len: int = 80
+    ) -> str:
         if not node:
             return ""
         node_range = node.get("range")
@@ -1295,4 +1516,3 @@ class CFGBuilder:
 
 
 __all__ = ["CFGBuilder"]
-

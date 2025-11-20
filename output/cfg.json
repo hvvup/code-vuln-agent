@@ -2,7 +2,7 @@
   "language": "javascript",
   "files": [
     {
-      "filePath": "D:\\juice-shop\\build\\routes\\updateUserProfile.js",
+      "filePath": "D:\\juice-shop\\routes\\updateUserProfile.ts",
       "functions": []
     }
   ]

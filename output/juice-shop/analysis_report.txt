@@ -1,0 +1,141 @@
+Repository Analysis Report
+================================================================================
+
+Repository: D:\juice-shop
+Analysis Date: 2025-11-20T08:23:51.305585
+Iterations: 13
+
+Analysis Results:
+--------------------------------------------------------------------------------
+The CFG generation for the top 10 files has failed due to JSON serialization issues. This could be due to complex code structures or non-standard JavaScript features that the CFG generator does not support.
+
+Given the issues encountered during AST parsing and CFG generation, it's not possible to provide a comprehensive vulnerability analysis for these files at this time. 
+
+However, based on the CodeQL findings, the repository seems to contain several potential security issues, including path injection, SQL injection, cross-site scripting (XSS), and insecure randomness. These vulnerabilities should be investigated further by manually reviewing the code or using more advanced analysis tools. 
+
+In addition, the repository should be checked for proper use of security controls such as input validation, output encoding, use of prepared statements for SQL queries, and use of secure random number generators. 
+
+Finally, the development team should be trained on secure coding practices to prevent the introduction of new vulnerabilities in the future.
+
+================================================================================
+Intermediate Steps:
+
+Step 1:
+  Tool: codeql_auto_analyze
+  Content: C:\Users\USER\AppData\Local\Temp\tmp2xa2mesw\out\codeql-results.sarif...
+
+Step 2:
+  Tool: parse_codeql_sarif
+  Content: Total: 130 findings
+  UNKNOWN: 130
+
+[UNKNOWN] js/polynomial-redos - This [regular expression](1) that depends on [a user-provided value](2) may run  (routes/profileImageUrlUpload.ts:20)
+[UNKNOWN] js/incomplete-url-substring-sanitization - '[://htmledit.squarefree.com](1)' can be anywhere in the URL, and arbitrary host (build/routes/updateUserProfile.js:50)
+[UNKNOWN] js/incomplete-url-substring-sanitization - '[://htmledit.squarefree.com](1)' can be anywhere in the URL, and arbitrary host (build/...
+
+Step 3:
+  Tool: parse_javascript_ast
+  Content: {
+  "error": "Failed to parse JavaScript: Line 9: Unexpected identifier at line 9",
+  "functions": [],
+  "variables": [],
+  "imports": [],
+  "vulnerabilities": []
+}...
+
+Step 4:
+  Tool: parse_javascript_ast
+  Content: {
+  "error": "Failed to parse JavaScript: Line 50: Unexpected token . at line 50",
+  "functions": [],
+  "variables": [],
+  "imports": [],
+  "vulnerabilities": []
+}...
+
+Step 5:
+  Tool: parse_javascript_ast
+  Content: {
+  "error": "Failed to parse JavaScript: Line 6: Unexpected identifier at line 6",
+  "functions": [],
+  "variables": [],
+  "imports": [],
+  "vulnerabilities": []
+}...
+
+Step 6:
+  Tool: parse_javascript_ast
+  Content: {
+  "functions": [],
+  "variables": [],
+  "imports": [],
+  "vulnerabilities": []
+}...
+
+Step 7:
+  Tool: parse_javascript_ast
+  Content: {
+  "functions": [],
+  "variables": [],
+  "imports": [],
+  "vulnerabilities": []
+}...
+
+Step 8:
+  Tool: parse_javascript_ast
+  Content: {
+  "error": "Failed to parse JavaScript: Line 13: Unexpected identifier at line 13",
+  "functions": [],
+  "variables": [],
+  "imports": [],
+  "vulnerabilities": []
+}...
+
+Step 9:
+  Tool: parse_javascript_ast
+  Content: {
+  "error": "Failed to parse JavaScript: Line 7: Unexpected identifier at line 7",
+  "functions": [],
+  "variables": [],
+  "imports": [],
+  "vulnerabilities": []
+}...
+
+Step 10:
+  Tool: parse_javascript_ast
+  Content: {
+  "error": "Failed to parse JavaScript: Line 7: Unexpected identifier at line 7",
+  "functions": [],
+  "variables": [],
+  "imports": [],
+  "vulnerabilities": []
+}...
+
+Step 11:
+  Tool: parse_javascript_ast
+  Content: {
+  "error": "Failed to parse JavaScript: Line 7: Unexpected identifier at line 7",
+  "functions": [],
+  "variables": [],
+  "imports": [],
+  "vulnerabilities": []
+}...
+
+Step 12:
+  Tool: parse_javascript_ast
+  Content: {
+  "error": "Failed to parse JavaScript: Line 3: Unexpected identifier at line 3",
+  "functions": [],
+  "variables": [],
+  "imports": [],
+  "vulnerabilities": []
+}...
+
+Step 13:
+  Tool: cfg_generator
+  Content: {
+  "error": "CFG generation failed: Object of type Pattern is not JSON serializable",
+  "files_processed": 10,
+  "note": "Some files may have been skipped due to parsing errors. Check warnings above.",
+  "partial_results": "output\\cfg.json"
+}...

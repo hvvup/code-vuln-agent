@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -17,16 +18,32 @@ class CFGGeneratorToolInput(BaseModel):
 
     files: List[str] = Field(
         ...,
-        description="List of JavaScript file paths to analyze (e.g., ['/path/to/file.js'])"
+        description="List of JavaScript file paths to analyze (e.g., ['/path/to/file.js'])",
     )
     language: str = Field(
-        default="javascript",
-        description="Programming language (default: javascript)"
+        default="javascript", description="Programming language (default: javascript)"
     )
     options: Optional[Dict[str, Any]] = Field(
         default=None,
-        description="Optional CFG generation options (moduleType, parser, loopUnrollK, etc.)"
+        description="Optional CFG generation options (moduleType, parser, loopUnrollK, etc.)",
     )
+
+
+class CustomJSONEncoder(json.JSONEncoder):
+    """JSON으로 변환 불가능한 객체(Pattern 등)를 문자열로 처리하는 인코더"""
+
+    def default(self, obj):
+        try:
+            # 정규표현식 패턴 객체인 경우 패턴 문자열만 반환
+            if isinstance(obj, re.Pattern):
+                return obj.pattern
+            # 집합(set)인 경우 리스트로 변환
+            if isinstance(obj, set):
+                return list(obj)
+            # 기타 객체는 문자열로 변환
+            return str(obj)
+        except:
+            return super().default(obj)
 
 
 class CFGGeneratorTool(BaseTool):
@@ -45,18 +62,19 @@ class CFGGeneratorTool(BaseTool):
         self,
         files: List[str],
         language: str = "javascript",
-        options: Optional[Dict[str, Any]] = None
+        options: Optional[Dict[str, Any]] = None,
     ) -> str:
         """Generate CFG for the specified JavaScript files."""
-        payload = {
-            "files": files,
-            "language": language,
-            "options": options or {}
-        }
-        
+        payload = {"files": files, "language": language, "options": options or {}}
+
         try:
             output_paths = self._generator.generate(payload)
-            return json.dumps({key: str(path) for key, path in output_paths.items()}, indent=2)
+            # 결과 반환 시 CustomJSONEncoder 사용
+            return json.dumps(
+                {key: str(path) for key, path in output_paths.items()},
+                indent=2,
+                cls=CustomJSONEncoder,
+            )
         except Exception as e:
             # Return error information but don't crash
             error_info = {
@@ -67,15 +85,17 @@ class CFGGeneratorTool(BaseTool):
             # Try to get partial results if available
             try:
                 # Check if any output was generated before the error
-                import os
-                output_dir = Path(options.get("outputDir", "output") if options else "output")
+                output_dir = Path(
+                    options.get("outputDir", "output") if options else "output"
+                )
                 cfg_file = output_dir / "cfg.json"
                 if cfg_file.exists():
                     error_info["partial_results"] = str(cfg_file)
             except:
                 pass
-            
-            return json.dumps(error_info, indent=2)
+
+            # 에러 정보 반환 시에도 CustomJSONEncoder 사용 (중요!)
+            return json.dumps(error_info, indent=2, cls=CustomJSONEncoder)
 
     async def _arun(self, *args: Any, **kwargs: Any) -> str:
         """Async execution not supported."""

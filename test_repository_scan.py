@@ -20,7 +20,7 @@ load_dotenv()
 
 def test_juice_shop_scan():
     """Test scanning the juice-shop repository."""
-    
+
     # Initialize LLM
     # For OpenAI:
     llm = ChatOpenAI(
@@ -39,21 +39,21 @@ def test_juice_shop_scan():
     # Create the vulnerability analysis agent
     agent = create_vulnerability_agent(
         llm=llm,
-        verbose=True,  # Print reasoning steps
+        verbose=False,  # Print reasoning steps
         max_iterations=20,  # Increase for large repositories
         max_execution_time=600,  # 10 minutes max for large repos
     )
 
     # Repository path to scan
     repository_path = r"D:\juice-shop"
-    
+
     # Validate path exists
     repo_path = Path(repository_path)
     if not repo_path.exists():
         print(f"❌ Repository not found: {repository_path}")
         print("Please check the path and try again.")
         return
-    
+
     if not repo_path.is_dir():
         print(f"❌ Path is not a directory: {repository_path}")
         return
@@ -77,10 +77,10 @@ def test_juice_shop_scan():
         print(f"Analysis Date: {result['analysis_date']}")
         print(f"Iterations: {result['iterations']}")
         print(f"\nNumber of tool calls: {len(result['intermediate_steps'])}")
-        
+
         print("\n--- Analysis Results ---")
         print(result["output"])
-        
+
         # Save results to file
         output_file = Path("output/juice-shop/analysis_report.txt")
         output_file.parent.mkdir(parents=True, exist_ok=True)
@@ -95,19 +95,19 @@ def test_juice_shop_scan():
             f.write(result["output"])
             f.write(f"\n\n{'=' * 80}\n")
             f.write("Intermediate Steps:\n")
-            for i, step in enumerate(result['intermediate_steps'], 1):
+            for i, step in enumerate(result["intermediate_steps"], 1):
                 f.write(f"\nStep {i}:\n")
                 f.write(f"  Tool: {step.get('tool', 'Unknown')}\n")
                 f.write(f"  Content: {step.get('content', '')[:500]}...\n")
-        
+
         print(f"\n✅ Full report saved to: {output_file}")
-        
+
     except Exception as e:
         print(f"\n❌ Error during analysis: {e}")
         import traceback
+
         traceback.print_exc()
 
 
 if __name__ == "__main__":
     test_juice_shop_scan()
-
